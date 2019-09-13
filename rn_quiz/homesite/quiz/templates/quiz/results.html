@@ -1,0 +1,198 @@
+{% extends "base_site.html" %}
+{% block content %}
+
+<br>
+<h1 class="display-5">Congratulations! Please review your results now</h1>
+<p class="lead">
+    Your score : <strong> 89% </strong>
+</p>
+<hr>
+<br>
+
+{% if latest_question_list %}
+{% for latest_question in latest_question_list %}
+    {% comment %} getting the data from a answer list that the user have created  {% endcomment %}
+        {% comment %} {% for qid,answerid in users_answers.items %}
+            {% if qid in latest_question.qid %}
+                {% with useranswerid={{answerid}} %}
+                        {{useranswerid}} = {{None}}
+                        <p>{{useranswerid}}</p>
+                {% endwith %}
+            {{ break }}
+            {% endif %}
+        {% endfor %} {% endcomment %}
+    
+
+<input type="hidden" id="question_id" value={{latest_question.qid}} name="question_id">
+<div class="card">
+    <div class="card-header">
+        <h5>Question : {{latest_question.qid}}</h5>
+        <b>Referance from : {{latest_question.content.reference}} </b>  
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">{{latest_question.content.stem}}</h5>
+        <p class="card-text">
+            {% for option,optionvalue in latest_question.content.option.items %}
+            {% if optionvalue %}
+            <table>
+                <tr>
+                    <td>
+                        {% if option in latest_question.content.answers %}
+                            {% if option in useranswerid %}
+                                <label class="control control-checkbox">
+                                    <input type="checkbox" value="{{ option }}" id="{{ option }}" name="q_answers"
+                                        {{ option }} />
+                                    Your Answer: <strong><b>{{optionvalue}}</b></strong>
+                                    <div class="control_indicator"></div>
+                                </label>
+                            {% else %} 
+                                <label class="control control-checkbox">
+                                    <input type="checkbox" value="{{ option }}" id="{{ option }}" name="q_answers"
+                                        {{ option }} />
+                                    <strong><b>{{optionvalue}}</b></strong>
+                                    <div class="control_indicator"></div>
+                                </label>
+                            {% endif %}  
+                        {% else %}
+                            <label class="control control-checkbox">
+                                <input type="checkbox" value="{{ option }}" id="{{ option }}" name="q_answers"
+                                    {{ option }} />
+                                {{optionvalue}}
+                                <div class="control_indicator"></div>
+                            </label>
+                        {% endif %}
+                    </td>
+                </tr>
+                </tr>
+            </table>
+            {% endif %}
+            {% endfor %}
+
+            <hr>
+            <h5>Rationale</h5>
+            <hr>
+                </p>
+                    {% for rationalkey,rationalvalue in latest_question.content.rationale.items %}
+                        {% if rationalvalue %}
+                        <p>
+                            {{rationalkey}} - {{rationalvalue}}
+                        </p>
+                    {% endif %}
+                {% endfor %}
+                </p>
+
+            <hr>
+            <h5>Your Answers</h5>
+            <hr>
+                </p>
+                    {% for qid,answerid in users_answers.items %}
+                        {% if answerid %}
+                            {% if qid == latest_question.qid %}
+                                {% comment %} <p>
+                                    {{qid}} - {{answerid}}
+                                </p> {% endcomment %}
+                                {% for option,optionvalue in latest_question.content.option.items %}
+                                    {% if option in answerid %}
+                                    <p>
+                                        {{option}} - {{optionvalue}}
+                                    </p>
+                                    {% endif %}
+                                {% endfor %}            
+                                {{break}}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </p>
+    </div>
+</div>
+<br>
+{% endfor %}
+{% endif %}
+
+
+{% endblock %}
+
+{% block scripts %}
+{% load staticfiles %}
+<script src="{% static 'app/scripts/jquery.validate.min.js' %}"></script>
+<style>
+    .control {
+        font-family: arial;
+        display: block;
+        position: relative;
+        padding-left: 28px;
+        margin-bottom: 15px;
+        padding-top: 10px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .control input {
+        position: absolute;
+        z-index: -1;
+        opacity: 0;
+    }
+
+    .control_indicator {
+        position: absolute;
+        top: 10px;
+        left: 0;
+        height: 20px;
+        width: 20px;
+        background: #e6e6e6;
+        border: 0px solid #000000;
+    }
+
+    .control-radio .control_indicator {
+        border-radius: undefined%;
+    }
+
+    .control:hover input~.control_indicator,
+    .control input:focus~.control_indicator {
+        background: #cccccc;
+    }
+
+    .control input:checked~.control_indicator {
+        background: #000000;
+    }
+
+    .control:hover input:not([disabled]):checked~.control_indicator,
+    .control input:checked:focus~.control_indicator {
+        background: #0e6647d;
+    }
+
+    .control input:disabled~.control_indicator {
+        background: #e6e6e6;
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .control_indicator:after {
+        box-sizing: unset;
+        content: '';
+        position: absolute;
+        display: none;
+    }
+
+    .control input:checked~.control_indicator:after {
+        display: block;
+    }
+
+    .control-checkbox .control_indicator:after {
+        left: 8px;
+        top: 4px;
+        width: 3px;
+        height: 8px;
+        border: solid #ffffff;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+
+    .control-checkbox input:disabled~.control_indicator:after {
+        border-color: #7b7b7b;
+    }
+</style>
+</head>
+
+{% endblock %}

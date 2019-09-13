@@ -1,0 +1,183 @@
+{% extends "base_site.html" %}
+{% block content %}
+{{latest_question_list}}
+<form action="./?page={{latest_question_list.next_page_number}}"  method="post" >
+{% csrf_token %}
+{% comment %} 
+    {% if latest_question_list.paginator.page_range <= latest_question_list.next_page_number %}
+        {% with pageNumber=latest_question_list.next_page_number %}
+        {% endwith %}
+    {% else %}
+        {% with pageNumber=latest_question_list.paginator.page_range %}
+        {% endwith %} 
+    {% endif %} 
+{% endcomment %}
+
+<br>
+<h1 class="display-4">Questions in random order</h1>
+<p class="lead">
+    Please answer the questions and hit submit to evaluate and show rational
+</p>
+<hr>
+<br>
+
+{% if latest_question_list %}
+{% for latest_question in latest_question_list %}
+<input type="hidden" id="question_id" value={{latest_question.qid}} name="question_id">
+<div class="card">
+    <div class="card-header">
+        <h4>Question : {{latest_question.qid}}</h4>
+        <strong>Referance from : {{latest_question.content.reference}} </strong> 
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">{{latest_question.content.stem}}</h5>
+        <p class="card-text">
+            {% for option,optionvalue in latest_question.content.option.items %}
+            {% if optionvalue %}
+            <table>
+                <tr>
+                    <td>
+                        <label class="control control-checkbox">
+                            <input type="checkbox" value="{{ option }}" id="{{ option }}" name="q_answers"
+                            {{ option }} />{{optionvalue}}
+                            <div class="control_indicator"></div>
+                        </label>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+            </table>
+            {% endif %}
+            {% endfor %}
+        </p>
+    </div>
+</div>
+<br>
+{% endfor %}
+
+
+{% if latest_question_list.has_other_pages %}
+<ul class="pagination">
+    {% if latest_question_list.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+    <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in latest_question_list.paginator.page_range %}
+        {% if latest_question_list.number == i %}
+            <li class="active">
+                <span>{{ i }} <span class="sr-only"></span>
+                </span>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ i }}">{{ i }}
+                </a>
+            </li>
+        {% endif %}
+    {% endfor %}
+    {% if latest_question_list.has_next %}
+    <li class="page-item">
+        <a class="page-link" href="?page={{ latest_question_list.next_page_number }}">&raquo;</a>
+    </li>
+    {% else %}
+    <li class="page-item disabled"><span>&raquo;</span></li>
+    {% endif %}
+</ul>
+
+
+
+<input type="submit" value="Submit" class="btn btn-default" />
+{% endif %}
+
+{% else %}
+<p>No questions are available.</p>
+{% endif %}
+</form>
+{% endblock %}
+
+
+{% block scripts %}
+{% load staticfiles %}
+<script src="{% static 'app/scripts/jquery.validate.min.js' %}"></script>
+<style>
+    .control {
+        font-family: arial;
+        display: block;
+        position: relative;
+        padding-left: 28px;
+        margin-bottom: 15px;
+        padding-top: 10px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .control input {
+        position: absolute;
+        z-index: -1;
+        opacity: 0;
+    }
+
+    .control_indicator {
+        position: absolute;
+        top: 10px;
+        left: 0;
+        height: 20px;
+        width: 20px;
+        background: #e6e6e6;
+        border: 0px solid #000000;
+    }
+
+    .control-radio .control_indicator {
+        border-radius: undefined%;
+    }
+
+    .control:hover input~.control_indicator,
+    .control input:focus~.control_indicator {
+        background: #cccccc;
+    }
+
+    .control input:checked~.control_indicator {
+        background: #000000;
+    }
+
+    .control:hover input:not([disabled]):checked~.control_indicator,
+    .control input:checked:focus~.control_indicator {
+        background: #0e6647d;
+    }
+
+    .control input:disabled~.control_indicator {
+        background: #e6e6e6;
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .control_indicator:after {
+        box-sizing: unset;
+        content: '';
+        position: absolute;
+        display: none;
+    }
+
+    .control input:checked~.control_indicator:after {
+        display: block;
+    }
+
+    .control-checkbox .control_indicator:after {
+        left: 8px;
+        top: 4px;
+        width: 3px;
+        height: 8px;
+        border: solid #ffffff;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+
+    .control-checkbox input:disabled~.control_indicator:after {
+        border-color: #7b7b7b;
+    }
+</style>
+</head>
+
+{% endblock %}
