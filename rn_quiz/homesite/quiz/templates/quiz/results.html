@@ -87,21 +87,18 @@
                 </p>
                     {% for qid,answerid in users_answers.items %}
                         {% if answerid %}
-                            {% if qid == latest_question.qid %}
-                                {% comment %} <p>
-                                    {{qid}} - {{answerid}}
-                                </p> {% endcomment %}
+                            {% if qid == latest_question.qid %}  
                                 {% for option,optionvalue in latest_question.content.option.items %}
                                     {% if option in answerid %}
                                     <p>
-                                        {{option}} - {{optionvalue}}
+                                        <b>{{option}} :  {{optionvalue}} </b>
                                     </p>
                                     {% endif %}
                                 {% endfor %}            
-                                {{break}}
-                            {% endif %}
+                            {% endif %} 
                         {% endif %}
                     {% endfor %}
+                    {{latest_question.content.answers}}
                 </p>
     </div>
 </div>
@@ -109,6 +106,7 @@
 {% endfor %}
 {% endif %}
 
+It is {% now "jS F Y H:i" %}
 
 {% endblock %}
 

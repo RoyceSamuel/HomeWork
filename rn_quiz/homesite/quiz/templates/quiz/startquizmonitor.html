@@ -1,6 +1,5 @@
 {% extends "base_site.html" %}
 {% block content %}
-{% comment %} {{latest_question_list}} {% endcomment %}
 <form action="./{{next_question}}"  method="post" >
 {% csrf_token %}
 {% comment %} 
@@ -55,10 +54,45 @@
 <br>
 {% endfor %}
 
+
+{% if latest_question_list.has_other_pages %}
+<ul class="pagination">
+    {% if latest_question_list.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+    <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in latest_question_list.paginator.page_range %}
+        {% if latest_question_list.number == i %}
+            <li class="active">
+                <span>{{ i }} <span class="sr-only"></span>
+                </span>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ i }}">{{ i }}
+                </a>
+            </li>
+        {% endif %}
+    {% endfor %}
+    {% if latest_question_list.has_next %}
+    <li class="page-item">
+        <a class="page-link" href="?page={{ latest_question_list.next_page_number }}">&raquo;</a>
+    </li>
+    {% else %}
+    <li class="page-item disabled"><span>&raquo;</span></li>
+    {% endif %}
+</ul>
+
+
+
+<input type="submit" value="Submit" class="btn btn-default" />
+{% endif %}
+
 {% else %}
 <p>No questions are available.</p>
 {% endif %}
-    <input type="submit" value="Submit" class="btn btn-default" />
+ <input type="submit" value="Submit" class="btn btn-default" />
 </form>
 {% endblock %}
 

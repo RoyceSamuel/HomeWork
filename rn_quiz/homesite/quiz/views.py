@@ -10,8 +10,6 @@ import json
 import functools
 from django.contrib.sessions.backends.db import SessionStore
 
-x={}
-part_latest_list = None
 
 def signup(request):
     context = {}    
@@ -34,55 +32,57 @@ def index(request):
     }
     return render(request, 'quiz/index.html', context)
 
-@login_required
-def start_quiz(request):
+def load_random_question():
     dict_from_file = reader.question_reader
     latest_question_list = dict_from_file.read_json_file() 
-    questions = latest_question_list[0:6]
+    questions = latest_question_list[0:10]
+    return questions
 
-    page = request.GET.get('page',1)
-    paginator = Paginator(questions, 1)
+@login_required
+def start_quiz(request):
+    questions = load_random_question()
+    request.session['questions']  = questions
+    request.session['users_answers'] ={}
+    context = {
+        'users_answers': None,
+        'latest_question_list': [questions[0]],
+        'next_question' : 1,
+        'length_of_dataset': len(questions),
+    }
+    request.session['context'] =context
+    return render(request, 'quiz/startquiz.html', context)
 
-    try:
-        part_latest_list = paginator.page(page)
-    except PageNotAnInteger:
-        page = paginator.page(1)
-    except EmptyPage:
-        part_latest_list = paginator.page(paginator.num_pages)
-    
-    # print(page,part_latest_list)
-    
-    if request.method=="POST":        
-        question_id = request.POST['question_id']
+@login_required
+def startquizmonitor(request,page_id):
+    questions = request.session['questions']
+    x = request.session['users_answers']
+    if request.method=="POST":
+        question_id = request.POST['question_id']       
         x.update(
              {
                  question_id : request.POST.getlist('q_answers')
              })
-        print(x)
-        part_latest_list = paginator.page(page)
+        request.session['users_answers'] = x 
     
-    # if int(page)>=len(paginator.page_range):
-    #      return render(request, 'quiz/results.html', {
-    #          'users_answers': x,
-    #          'latest_question_list':questions
-    #      })
+    print(request.session['users_answers'])
+
+    if page_id == len(questions) :
+        return render(request, 'quiz/results.html', 
+                context={
+                'users_answers': request.session['users_answers'],
+                'latest_question_list': questions,
+                'next_question' : 0,
+                'length_of_dataset': len(questions),
+                }
+        )
 
     context = {
         'users_answers': None,
-        'latest_question_list': part_latest_list,
+        'latest_question_list': [questions[page_id]],
+        'next_question' : page_id + 1,
+        'length_of_dataset': len(questions),
     }
-    
-    return render(request, 'quiz/startquiz.html', context)
-
-def startquiz(request,question_id):
-    if request.method=="POST":
-        print(request.POST)
-        print("QuestionID  :",question_id)
-        latest_question_list=None
-        context = {
-                'latest_question_list': latest_question_list,
-            }
-    return render(request, 'quiz/startquiz.html', context)
+    return render(request, 'quiz/startquizmonitor.html', context)
 
 
 def detail(request, question_id):
