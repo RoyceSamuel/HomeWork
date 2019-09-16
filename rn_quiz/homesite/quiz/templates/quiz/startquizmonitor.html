@@ -92,14 +92,13 @@
 {% else %}
 <p>No questions are available.</p>
 {% endif %}
- <input type="submit" value="Submit" class="btn btn-default" />
+<input type="submit" value="Submit" class="btn btn-default" />
 </form>
 {% endblock %}
 
 
 {% block scripts %}
 {% load staticfiles %}
-<script src="{% static 'app/scripts/jquery.validate.min.js' %}"></script>
 <style>
     .control {
         font-family: arial;

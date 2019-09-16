@@ -6,9 +6,10 @@ from quiz.blogic.questions_reader import reader
 from django.contrib.auth.forms import UserCreationForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
+from django.contrib.sessions.backends.db import SessionStore
+from collections import Counter
 import json
 import functools
-from django.contrib.sessions.backends.db import SessionStore
 
 
 def signup(request):
@@ -35,7 +36,7 @@ def index(request):
 def load_random_question():
     dict_from_file = reader.question_reader
     latest_question_list = dict_from_file.read_json_file() 
-    questions = latest_question_list[0:10]
+    questions = latest_question_list[0:25]
     return questions
 
 @login_required
@@ -64,15 +65,15 @@ def startquizmonitor(request,page_id):
              })
         request.session['users_answers'] = x 
     
-    print(request.session['users_answers'])
+    if page_id == len(questions):
 
-    if page_id == len(questions) :
         return render(request, 'quiz/results.html', 
                 context={
                 'users_answers': request.session['users_answers'],
                 'latest_question_list': questions,
                 'next_question' : 0,
                 'length_of_dataset': len(questions),
+                'score' : get_calulated_score(questions,request.session['users_answers'])
                 }
         )
 
@@ -84,6 +85,22 @@ def startquizmonitor(request,page_id):
     }
     return render(request, 'quiz/startquizmonitor.html', context)
 
+
+def get_calulated_score(questions,uanswers):
+        correct_answers=0
+        quest_answer =None
+        
+        for uans,uans_value in uanswers.items():
+            for quest in questions:
+                if quest['qid'] == uans:
+                    quest_answer = quest['content']['answers']
+                    break
+                
+            #x.append((map(lambda x, y: x == y,quest_answer ,uans_value)))
+            if Counter(quest_answer) == Counter(uans_value):
+                correct_answers =correct_answers + 1
+
+        return 0 if correct_answers<= 0 else (correct_answers/len(questions))*100    
 
 def detail(request, question_id):
     question = get_object_or_404(Question, pk=question_id)

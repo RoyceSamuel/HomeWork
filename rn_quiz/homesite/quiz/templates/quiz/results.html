@@ -4,7 +4,7 @@
 <br>
 <h1 class="display-5">Congratulations! Please review your results now</h1>
 <p class="lead">
-    Your score : <strong> 89% </strong>
+    Your score : <strong> {{score}} </strong>
 </p>
 <hr>
 <br>
@@ -37,30 +37,23 @@
             <table>
                 <tr>
                     <td>
-                        {% if option in latest_question.content.answers %}
-                            {% if option in useranswerid %}
+                        {% for answers in latest_question.content.answers %}
+                            {% if option in answers %}
+                                    <label class="control control-checkbox">
+                                        <input type="checkbox" value="{{ option }}" id="{{ option }}" name="q_answers"
+                                            {{ option }} />
+                                        <b class = "answercolor" >{{optionvalue}}</b>
+                                        <div class="control_indicator"></div>
+                                    </label>
+                            {% else %}
                                 <label class="control control-checkbox">
                                     <input type="checkbox" value="{{ option }}" id="{{ option }}" name="q_answers"
                                         {{ option }} />
-                                    Your Answer: <strong><b>{{optionvalue}}</b></strong>
+                                    {{optionvalue}}
                                     <div class="control_indicator"></div>
                                 </label>
-                            {% else %} 
-                                <label class="control control-checkbox">
-                                    <input type="checkbox" value="{{ option }}" id="{{ option }}" name="q_answers"
-                                        {{ option }} />
-                                    <strong><b>{{optionvalue}}</b></strong>
-                                    <div class="control_indicator"></div>
-                                </label>
-                            {% endif %}  
-                        {% else %}
-                            <label class="control control-checkbox">
-                                <input type="checkbox" value="{{ option }}" id="{{ option }}" name="q_answers"
-                                    {{ option }} />
-                                {{optionvalue}}
-                                <div class="control_indicator"></div>
-                            </label>
-                        {% endif %}
+                            {% endif %}
+                        {% endfor %}
                     </td>
                 </tr>
                 </tr>
@@ -90,15 +83,26 @@
                             {% if qid == latest_question.qid %}  
                                 {% for option,optionvalue in latest_question.content.option.items %}
                                     {% if option in answerid %}
-                                    <p>
-                                        <b>{{option}} :  {{optionvalue}} </b>
-                                    </p>
+                                        {% for answer in latest_question.content.answers %}
+                                            {%for eans in answerid %}
+                                                {% if answer in eans %}
+                                                    <p>
+                                                        <span class="glyphicon glyphicon-asterisk"></span>
+                                                        <b class ="answercolor">{{option}} :  {{optionvalue}} </b>
+                                                    </p>
+                                                    {% else %}
+                                                    <p>
+                                                        <span class="glyphicon glyphicon-asterisk"></span>
+                                                        <b class ="WrongAnswerColor">{{option}} :  {{optionvalue}} </b>
+                                                    </p>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endfor %}
                                     {% endif %}
                                 {% endfor %}            
                             {% endif %} 
                         {% endif %}
                     {% endfor %}
-                    {{latest_question.content.answers}}
                 </p>
     </div>
 </div>
@@ -114,6 +118,12 @@ It is {% now "jS F Y H:i" %}
 {% load staticfiles %}
 <script src="{% static 'app/scripts/jquery.validate.min.js' %}"></script>
 <style>
+    .answercolor{
+        color: green;
+    }
+    .WrongAnswerColor{
+        color: red;
+    }
     .control {
         font-family: arial;
         display: block;
